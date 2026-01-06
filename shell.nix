@@ -4,11 +4,17 @@ let
   pythonPackages = pkgs.python3Packages;
 in
 pkgs.mkShell {
+  packages = [
+    pkgs.rmapi
+  ];
   buildInputs = [
     pythonPackages.python
     pythonPackages.venvShellHook
     pythonPackages.wheel
     pythonPackages.setuptools
+    pythonPackages.rmscene
+    pythonPackages.rmcl
+    pythonPackages.icalendar
    ];
   venvDir = "./.venv";
   postVenvCreation = ''
