@@ -4,8 +4,9 @@ let
   pythonPackages = pkgs.python3Packages;
 in
 pkgs.mkShell {
-  packages = [
-    pkgs.rmapi
+  packages = with pkgs; [
+    rmapi
+    wkhtmltopdf
   ];
   buildInputs = [
     pythonPackages.python
@@ -15,6 +16,7 @@ pkgs.mkShell {
     pythonPackages.rmscene
     pythonPackages.rmcl
     pythonPackages.icalendar
+    pythonPackages.pdfkit
    ];
   venvDir = "./.venv";
   postVenvCreation = ''
