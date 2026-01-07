@@ -17,6 +17,7 @@ pkgs.mkShell {
     pythonPackages.rmcl
     pythonPackages.icalendar
     pythonPackages.pdfkit
+    pythonPackages.dominate
    ];
   venvDir = "./.venv";
   postVenvCreation = ''
