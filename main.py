@@ -1,4 +1,5 @@
-import pdfkit
+import asyncio
+import pyppeteer
 import dominate
 import calendar
 
@@ -15,7 +16,7 @@ def html_template(content):
     doc.add(content)
     return doc
 
-def main() -> None:
+async def main() -> None:
     pg = div(_class = "page")
     hcal = calendar.HTMLCalendar()
    
@@ -31,10 +32,19 @@ def main() -> None:
     with open("test.html", "w") as f:
         f.writelines(html_str.splitlines(keepends=True))
 
-    pdfkit.from_string(html_str, 'test.pdf', options=PDF_OPTS)
+    await print_pdf("test.html")
+
+
+
+async def print_pdf(file: str) -> None:
+    browser = await pyppeteer.launch(executablePath="/etc/profiles/per-user/elias/bin/google-chrome-stable")
+    page = await browser.newPage()
+    await page.goto(f"file://{file}")
+    await page.pdf(path="test.pdf", preferCSSPageSize=True)
+
 
 
     
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
