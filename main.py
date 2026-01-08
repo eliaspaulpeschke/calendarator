@@ -1,33 +1,44 @@
 import asyncio
-import pyppeteer
 import dominate
 import calendar
+import os
+from typing import Iterable
 
 from config import *
 from dominate.tags import *
 
-def html_template(content):
+type tag = a | th | tr | td | div | p | ul | ol | li
+
+cal = calendar.Calendar()
+
+def html_template(pages: Iterable[tag]):
     with open("style.css") as f:
         the_style = "".join(f.readlines())
     doc = dominate.document(title='Calendarator')
     with doc.head:
         with style():
             dominate.util.raw(the_style)
-    doc.add(content)
+    for content in pages:
+        doc.add(content)
     return doc
 
-async def main() -> None:
+def month_overview(year: int, month: int) -> div:
     pg = div(_class = "page")
-    hcal = calendar.HTMLCalendar()
-   
-    #Need to do a table anyway, flexbox seems to be broken
     with pg:
-        with div(_class = "year-container"):
-           for i in range(1,13):
-               with div(_class ="month-container"):
-                   dominate.util.raw(hcal.formatmonth(2026,i,False))
+        with div(_class = "month-container"):
+            with table():
+                with tr():
+                    for d in ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]:
+                        th(d)
+                for week in cal.monthdays2calendar(year, month):
+                    with tr():
+                        for (month_day, week_day) in week:
+                            td(div("" if month_day == 0 else str(month_day), _class=("monthday-empty" if month_day == 0 else "monthday-content" )))
 
-    html_str = html_template(pg).render()
+    return pg
+
+async def main() -> None:
+    html_str = html_template(month_overview(2026, i) for i in range(1,13)).render()
 
     with open("test.html", "w") as f:
         f.writelines(html_str.splitlines(keepends=True))
@@ -37,10 +48,9 @@ async def main() -> None:
 
 
 async def print_pdf(file: str) -> None:
-    browser = await pyppeteer.launch(executablePath="/etc/profiles/per-user/elias/bin/google-chrome-stable")
-    page = await browser.newPage()
-    await page.goto(f"file://{file}")
-    await page.pdf(path="test.pdf", preferCSSPageSize=True)
+    print(f"node js/index.js {os.path.abspath(file)}")
+    os.system(f"node js/index.js {os.path.abspath(file)}")
+
 
 
 

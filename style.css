@@ -1,4 +1,9 @@
 
+@font-face{
+    font-family: "Open Sans Light";
+    src: url(./fonts/OpenSans-Light.ttf);
+}
+
 @page {
     width: 1404px;
     height: 1872px;
@@ -6,6 +11,7 @@
 }
 * {
     box-sizing: border-box;
+    font-family: "Open Sans Light";
     margin: 0;
     padding: 0;
 }
@@ -14,20 +20,35 @@
     height: 1872px;
 }
 
-.year-container {
-    display: grid;
-    grid-template-columns: 30% 30% 30%;
-    grid-template-rows: 20% 20% 20% 20%;
-    padding: 3%;
+.month-container {
+    font-size: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    border: 5px solid green;
+}
+
+.month-container th {
+    font-size: 1.5rem;
+    text-align: left;
+    padding: 1.1rem;
+}
+
+.month-container td {
+    padding:0.8rem;
+    width: 12vw;
+    height: 15vh;
+}
+
+.monthday-content {
+    border: 1px solid gray;
+    border-radius: 0.3rem;
+    padding: 0.3rem;
     width: 100%;
     height: 100%;
 }
 
-.month-container {
-    font-size: 0.5rem;
-}
-
-.month-container th {
-    padding: 0.1rem;
-    margin: 0.1rem;
+table.month {
 }
