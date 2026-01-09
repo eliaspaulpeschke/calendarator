@@ -18,6 +18,7 @@ pkgs.mkShell {
     pythonPackages.rmscene
     pythonPackages.rmcl
     pythonPackages.icalendar
+    pythonPackages.recurring-ical-events
     pythonPackages.dominate
    ];
   venvDir = "./.venv";

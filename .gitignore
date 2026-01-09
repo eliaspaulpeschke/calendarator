@@ -1,5 +1,8 @@
 __pycache__
 node_modules
-test.pdf
-test.html
+*.pdf
+*.html
 fonts
+.env
+.env.py
+*.ics

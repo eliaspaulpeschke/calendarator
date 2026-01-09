@@ -5,7 +5,7 @@ const page = await browser.newPage();
 await page.goto(`file://${process.argv[2]}`, {waitUntil: 'networkidle2'});
 
 await page.pdf({
-      path: 'test.pdf'
+      path: 'Kalender.pdf'
     , preferCSSPageSize: true});
 
 await browser.close();
