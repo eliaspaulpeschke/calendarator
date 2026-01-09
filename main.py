@@ -5,38 +5,42 @@ import icalendar
 import recurring_ical_events
 import datetime
 from datetime import timedelta
-import os,sys
+import os,sys,shutil
 import pathlib
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import Iterable
 
 from config import *
 from dominate.tags import *
 
-
-
 cal = calendar.Calendar()
 
-def get_icals() -> list[icalendar.Calendar]:
-    try: 
-        import importlib.util
-        spec = importlib.util.spec_from_file_location(name = "env", location= "./.env.py")
-        module = importlib.util.module_from_spec(spec)
-        sys.modules["env"] = module
-        spec.loader.exec_module(module)
-        calendar_urls = module.calendar_urls
-    except ImportError:
-        print("Could not find .env.py")
-        return []
-    calendars = []
-    for (idx, url) in enumerate(calendar_urls):
-        cname = f"cal{idx}.ics"
-        os.system(f"wget -O {cname} {url}")
-        cpath = pathlib.Path(cname)
-        cal = icalendar.Calendar.from_ical(cpath.read_bytes())
-        calendars.append(cal)
-    return calendars
+icals = None
+def get_icals(refresh: bool = False) -> list[icalendar.Calendar]:
+    global icals
+    if icals == None or refresh == True:
+        try: 
+            import importlib.util
+            spec = importlib.util.spec_from_file_location(name = "env", location= "./.env.py")
+            module = importlib.util.module_from_spec(spec)
+            sys.modules["env"] = module
+            spec.loader.exec_module(module)
+            calendar_urls = module.calendar_urls
+        except ImportError:
+            print("Could not find .env.py")
+            return []
+        calendars = []
+        for (idx, url) in enumerate(calendar_urls):
+            cname = f"cal{idx}.ics"
+            os.system(f"wget -O {cname} {url}")
+            cpath = pathlib.Path(cname)
+            cal = icalendar.Calendar.from_ical(cpath.read_bytes())
+            calendars.append(cal)
+        icals = calendars
+        return calendars
+    return icals
 
-icals = get_icals()
 
 def get_month(month: int) -> str:
     months = ["Januar", "Februar" , "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"]
@@ -61,7 +65,7 @@ def get_weeknr(year: int, month: int, day:int) -> int:
 
 def get_events_for_date(date: datetime.date) -> list[icalendar.Component]:
     events = []
-    for cal in icals:
+    for cal in get_icals():
         events.extend(recurring_ical_events.of(cal).between(date, date + timedelta(days=1)))
     return events
 
@@ -105,9 +109,24 @@ async def print_pdf(file: str) -> None:
     os.system(f"node js/index.js {os.path.abspath(file)}")
 
 
-
-
-    
+def update_pdf_rmapi(rm_file: str, pdf_name: Path, rm_path: str = "") -> None:
+    if rm_path != "" and not rm_path.endswith("/"):
+        rm_path += "/"
+    os.system(f"rmapi get {rm_path}{rm_file}")
+    if not rm_file.endswith(".rmdoc"):
+        rm_file = rm_file + ".rmdoc"
+    with TemporaryDirectory(delete=False) as tdir:
+        print(tdir)
+        tpath = Path(tdir)
+        os.system(f"unzip -d {tpath} {rm_file}")
+        the_id = os.listdir(tdir)[0].split(".")[0]
+        shutil.copy(pdf_name, tpath / Path(f"{the_id}.pdf"))
+        wd = os.getcwd()
+        os.chdir(tpath)
+        os.system(f"zip -0 -r {rm_file} *")
+    print(f"rmapi put --force {rm_file} {rm_path}")
+    os.system(f"rmapi put --force {rm_file} {rm_path}")
+    os.chdir(wd)
 
 if __name__ == "__main__":
     asyncio.run(main())
